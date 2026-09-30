@@ -1,0 +1,20 @@
+{
+  "name": "story-platform-bot",
+  "version": "1.0.0",
+  "description": "Telegram Admin Bot for Story Reading Platform hosted on Render",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "telegraf": "^4.16.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
