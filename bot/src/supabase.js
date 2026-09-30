@@ -1,3 +1,10 @@
+import WebSocket from 'ws';
+
+// Polyfill native WebSocket for Node environments < 22 on hosting platforms like Render
+if (!globalThis.WebSocket) {
+  globalThis.WebSocket = WebSocket;
+}
+
 import { createClient } from '@supabase/supabase-js';
 import { config } from './config.js';
 
@@ -12,6 +19,9 @@ export function getSupabase() {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
+      },
+      realtime: {
+        websocket: WebSocket,
       },
     });
   }
@@ -31,13 +41,34 @@ export async function downloadTelegramFile(fileUrl) {
 }
 
 /**
+ * Ensure storage bucket exists
+ */
+export async function ensureBucket() {
+  const supabase = getSupabase();
+  try {
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const hasBucket = buckets?.some((b) => b.name === 'story-covers');
+    if (!hasBucket) {
+      console.log('[Storage] Creating public bucket story-covers...');
+      await supabase.storage.createBucket('story-covers', {
+        public: true,
+        fileSizeLimit: 10485760, // 10MB
+      });
+    }
+  } catch (err) {
+    console.warn('[Storage] Bucket check warning:', err.message);
+  }
+}
+
+/**
  * Upload a photo buffer to Supabase Storage bucket 'story-covers'
  */
 export async function uploadCoverImage(buffer, extension = 'jpg', mimeType = 'image/jpeg') {
   const supabase = getSupabase();
+  await ensureBucket();
+
   const filename = `cover_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${extension}`;
   
-  // Ensure bucket exists or handle upload
   const { data, error } = await supabase.storage
     .from('story-covers')
     .upload(filename, buffer, {

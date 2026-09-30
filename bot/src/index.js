@@ -1,3 +1,8 @@
+import WebSocket from 'ws';
+if (!globalThis.WebSocket) {
+  globalThis.WebSocket = WebSocket;
+}
+
 import { Telegraf, Scenes, session } from 'telegraf';
 import express from 'express';
 import { config, validateConfig } from './config.js';
