@@ -37,6 +37,9 @@ export default function AuthModal({ isOpen, onClose, onShowToast }) {
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
+          options: {
+            emailRedirectTo: window.location.origin,
+          },
         });
         if (error) throw error;
 
@@ -49,6 +52,9 @@ export default function AuthModal({ isOpen, onClose, onShowToast }) {
       } else if (mode === 'magic') {
         const { error } = await supabase.auth.signInWithOtp({
           email: email.trim(),
+          options: {
+            emailRedirectTo: window.location.origin,
+          },
         });
         if (error) throw error;
         setSuccessMsg('Magic login link has been sent to your email address!');
